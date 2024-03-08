@@ -8,26 +8,56 @@
     <link href="css/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script src="https://unpkg.com/htmx.org@1.9.10"
+        integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
     <div class="flex">
+        <!--side menu-->
         <ul class="menu bg-base-200 w-56">
             <li><a>Item 1</a></li>
             <li><a class="active">Item 2</a></li>
             <li><a>Item 3</a></li>
         </ul>
         <div class="flex flex-col h-screen w-screen">
-            <div class="flex-grow">
-                <!--chat goes here-->
+            <!--chat-->
+            <div class="flex-grow" id="message-list">
+                {{ range .Messages}}
+                {{ block "message-element" . }}
+                <div class="chat chat-end">
+                    <div class="chat-header">
+                        <!--UserName goes here-->
+                        StarKiller
+                        <time class="text-xs opacity-50">
+                            <!--Timestamp goes here-->
+                            2 hour ago
+                        </time>
+                    </div>
+                    <div class="chat-bubble">
+                        <!--message goes here-->
+                        {{ .Text}}
+                    </div>
+                    <div class="chat-footer opacity-50">
+                        <!--status goes here ie. Delivered or Seen-->
+                        Delivered
+                    </div>
+                </div>
+                {{end}}
+                {{ end }}
             </div>
-            <!--text area here-->
+            <!--text area-->
             <div class="m-8">
-                <input type="text" placeholder="Type here" class="input input-bordered input-primary w-full" />
+                <form hx-post="/send-message/" hx-target="#message-list" hx-swap="beforeend"
+                    hx-on::after-request="this.reset()">
+                    <input name="text-bar" type="text" placeholder="Type here"
+                        class="input input-bordered input-primary w-full" />
+                </form>
             </div>
         </div>
     </div>
 </body>
+
 
 </html>
