@@ -51,7 +51,7 @@
             <div class="m-8">
                 <form hx-post="/send-message/" hx-target="#message-list" hx-swap="beforeend"
                     hx-on::after-request="this.reset()">
-                    <input name="text-bar" type="text" placeholder="Type here"
+                    <input name="text" type="text" placeholder="Type here"
                         class="input input-bordered input-primary w-full" required />
                 </form>
             </div>

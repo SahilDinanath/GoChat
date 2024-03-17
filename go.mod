@@ -1,4 +1,4 @@
-module github.com/GoChat
+module github.com/SahilDinanath/GoChat
 
 go 1.22.0
 
