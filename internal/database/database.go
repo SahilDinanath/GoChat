@@ -3,9 +3,11 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"log"
 	"os"
+	"regexp"
+
+	"github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
@@ -73,11 +75,63 @@ func SaveMessage(message string, memberId int) error {
 	return nil
 }
 
+func isEmpty(strings ...string) bool {
+	for _, str := range strings {
+		if str == "" {
+			return false
+		}
+	}
+	return true
+}
+func isValidEmail(email string) bool {
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	match, _ := regexp.MatchString(regex, email)
+
+	return match
+}
+
+func LoginUser(email string, password string) error {
+	if !isEmpty(email, password) {
+		log.Print(email, password)
+		return fmt.Errorf("Fields left empty!")
+	}
+
+	if !isValidEmail(email) {
+		return fmt.Errorf("Invalid email!")
+	}
+
+	var userId int
+	var username string
+	var validationPassword string
+	err := db.QueryRow("Select user_id, username,password from users where email=?", email).Scan(&userId, &username, &password)
+
+	if err == sql.ErrNoRows {
+		return fmt.Errorf("Email not found! User should register.")
+	}
+
+	if password != validationPassword {
+		return fmt.Errorf("Password is incorrect!")
+	}
+
+	return nil
+
+}
 func SaveUser(userName string, email string, password string) error {
+
+	if !isEmpty(userName, email, password) {
+		return fmt.Errorf("Fields left empty!")
+	}
+
+	if !isValidEmail(email) {
+		return fmt.Errorf("Invalid email!")
+	}
+
 	_, err := db.Query("INSERT INTO users(username, email, password) VALUES (?,?,?)", userName, email, password)
 
 	if err != nil {
-		return fmt.Errorf("SaveUser %q, %q, %q: %v", userName, email, password, err)
+		return fmt.Errorf("Email already registered!")
 	}
+
 	return nil
 }
