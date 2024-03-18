@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/SahilDinanath/GoChat/internal/database"
 )
@@ -37,7 +38,15 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 	/*
 		I need to implement saving message to database from here and also call a function to broadcast to all existing chats
 	*/
-	database.SaveMessage(message, 1)
+	cookie, err := r.Cookie("user_id")
+
+	if err != nil {
+		log.Printf("user cookie error: %v", err)
+	}
+
+	userId, err := strconv.Atoi(cookie.Value)
+	fmt.Println(userId)
+	database.SaveMessage(message, userId, 1)
 
 	data := map[string]string{
 		"Text": message,
@@ -49,7 +58,7 @@ func sendMessage(w http.ResponseWriter, r *http.Request) {
 func loginUser(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
-	err := database.LoginUser(r.FormValue("email"), r.FormValue("password"))
+	user, err := database.LoginUser(r.FormValue("email"), r.FormValue("password"))
 
 	var htmlContent string
 
@@ -68,6 +77,13 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		`, err)
 
 	} else {
+		cookie := http.Cookie{
+			Name:  "user_id",
+			Value: strconv.Itoa(user.UserId),
+			Path:  "/",
+		}
+		http.SetCookie(w, &cookie)
+		log.Println("cookie sent.")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
