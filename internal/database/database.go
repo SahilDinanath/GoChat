@@ -104,7 +104,7 @@ func LoginUser(email string, password string) error {
 	var userId int
 	var username string
 	var validationPassword string
-	err := db.QueryRow("Select user_id, username,password from users where email=?", email).Scan(&userId, &username, &password)
+	err := db.QueryRow("Select user_id, username, password from users where email=?", email).Scan(&userId, &username, &validationPassword)
 
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("Email not found! User should register.")
